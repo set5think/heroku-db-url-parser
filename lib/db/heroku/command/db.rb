@@ -2,9 +2,15 @@ require 'heroku/command/db'
 
 class Heroku::Command::Db
 
-  # db:parse_db_url [DATABASE_URL] [--format={psql|pgpass}]
+  # db:parse_db_url [DATABASE_URL] [--format {psql|pgpass|all}] [--alias NAME] [--append] [--bashfile BASHRC_PATH] [--pgpass PGPASS_PATH]
   #
   # generates a string to the format specified, psql by default, DATABASE_URL by default
+  #
+  # -f, --format FORMAT   # set the output format (psql, pgpass, all)
+  # --append              # append output to bash_profile (as an alias) and pgpass
+  # --alias NAME          # name of alias for bash_profile.
+  # --bashfile            # path to bashrc or bash_profile for appending. Defaults to ~/.bash_profile
+  # --pgpass              # path to pgpass file for appending. Defaults to ~/.pgpass
   #
   #Examples:
   #
@@ -14,14 +20,14 @@ class Heroku::Command::Db
   #
   # $ heroku db:parse_db_url # generates psql string for DATABASE_URL
   #
+  # $ heroku db:parse_db_url --format all --append --alias db1 --bashfile /home/zaphod/.aliased
+  #
 
   def parse_db_url
-
     db = args.detect { |a| a.include?('HEROKU_POSTGRESQL_') } || 'DATABASE_URL'
 
-    format = args.detect { |a| a.include?("--format") }
-
-    format = format.split(/=/)[1] rescue nil
+    format = options[:format] || 'psql'
+    append = options[:append] || false
 
     db_info = {}
 
@@ -44,18 +50,30 @@ class Heroku::Command::Db
 
     return "#{uri_parts[:scheme]} not supported yet" if uri_parts[:scheme] != 'postgres'
 
-    if format.nil? || format == "psql"
+    case format
+      when 'psql', 'all'
+        display(psqlify(uri_parts))
+      when 'pgpass', 'all'
+        display(pgpassify(uri_parts))
+      else
+        display("#{format} not known or supported. Please use 'psql' or 'pgpass'")
+    end
 
-      display(psqlify(uri_parts))
+    if append
+      bash   = options[:bashfile] || "#{ENV['HOME']}/.bash_profile"
+      pgpass = options[:pgpass]   || "#{ENV['HOME']}/.pgpass"
 
-    elsif format == 'pgpass'
-
-      display(pgpassify(uri_parts))
-
-    else
-
-      display("#{format} not known or supported. Please use 'psql' or 'pgpass'")
-
+      if options[:alias] && !File.exists?(bash) 
+          display "File does not exists: #{bash}"
+      elsif !File.exists?(pgpass)
+          display "File does not exists: #{pgpass}"
+      else
+        if options[:alias]
+          alias_text = "alias #{options[:alias]}='#{psqlify(uri_parts)}'"
+          append_to_file(bash, alias_text)
+        end
+        append_to_file(pgpass, pgpassify(uri_parts))
+      end
     end
 
   end
@@ -72,6 +90,14 @@ class Heroku::Command::Db
 
   def cleanse_path(path)
     path.sub(/^\//,'')
+  end
+
+  def append_to_file(file, text)
+    raise "unable to write to #{file}" unless File.writable?(file)
+    display "Appending #{text} to #{file}"
+    open(file, 'a') do |f|
+      f.puts text
+    end
   end
 
 end
