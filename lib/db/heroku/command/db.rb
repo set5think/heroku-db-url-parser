@@ -46,11 +46,11 @@ class Heroku::Command::Db
 
     if format.nil? || format == "psql"
 
-      display("psql -h #{uri_parts[:host]} -d #{uri_parts[:db]} -U #{uri_parts[:user]} -p #{uri_parts[:port]}")
+      display(psqlify(uri_parts))
 
     elsif format == 'pgpass'
 
-      display("#{uri_parts[:host]}:#{uri_parts[:port]}:#{uri_parts[:db]}:#{uri_parts[:user]}:#{uri_parts[:pw]}")
+      display(pgpassify(uri_parts))
 
     else
 
@@ -61,6 +61,14 @@ class Heroku::Command::Db
   end
 
   protected
+
+  def psqlify(uri_hash)
+    "psql -h #{uri_hash[:host]} -d #{uri_hash[:db]} -U #{uri_hash[:user]} -p #{uri_hash[:port]}")
+  end
+
+  def pgpassify(uri_hash)
+    "#{uri_hash[:host]}:#{uri_hash[:port]}:#{uri_hash[:db]}:#{uri_hash[:user]}:#{uri_hash[:pw]}")
+  end
 
   def cleanse_path(path)
     path.sub(/^\//,'')
