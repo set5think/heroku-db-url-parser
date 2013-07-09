@@ -63,11 +63,11 @@ class Heroku::Command::Db
   protected
 
   def psqlify(uri_hash)
-    "psql -h #{uri_hash[:host]} -d #{uri_hash[:db]} -U #{uri_hash[:user]} -p #{uri_hash[:port]}")
+    "psql -h #{uri_hash[:host]} -d #{uri_hash[:db]} -U #{uri_hash[:user]} -p #{uri_hash[:port]}"
   end
 
   def pgpassify(uri_hash)
-    "#{uri_hash[:host]}:#{uri_hash[:port]}:#{uri_hash[:db]}:#{uri_hash[:user]}:#{uri_hash[:pw]}")
+    "#{uri_hash[:host]}:#{uri_hash[:port]}:#{uri_hash[:db]}:#{uri_hash[:user]}:#{uri_hash[:pw]}"
   end
 
   def cleanse_path(path)
