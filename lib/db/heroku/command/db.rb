@@ -44,22 +44,15 @@ class Heroku::Command::Db
 
     return "#{uri_parts[:scheme]} not supported yet" if uri_parts[:scheme] != 'postgres'
 
-    if format.nil? || format == "psql"
-
-      display(psqlify(uri_parts))
-
-    elsif format == 'pgpass'
-
-      display(pgpassify(uri_parts))
-
-    elsif format == 'rails_yaml'
-
-      display(rails_yamlify(uri_parts))
-
+    display case format
+    when "psql", nil
+      psqlify(uri_parts)
+    when "pgpass"
+      pgpassify(uri_parts)
+    when "rails_yaml"
+      rails_yamlify(uri_parts)
     else
-
-      display("#{format} not known or supported. Please use 'psql' or 'pgpass'")
-
+      "#{format} not known or supported. Please use 'psql' or 'pgpass'"
     end
 
   end
