@@ -2,7 +2,7 @@ require 'heroku/command/db'
 
 class Heroku::Command::Db
 
-  # db:parse_db_url [DATABASE_URL] [--format={psql|pgpass}]
+  # db:parse_db_url [DATABASE_URL] [--format={psql|pgpass|rails_yaml}]
   #
   # generates a string to the format specified, psql by default, DATABASE_URL by default
   #
