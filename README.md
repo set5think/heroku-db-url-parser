@@ -16,6 +16,16 @@ This extension aids in the situation where you need to convert your database url
 
     $ heroku db:parse_db_url # parses DATABASE_URL and formats to psql, by default
 
+## Supported Databases
+
+Currently, Postgres is the only supported database, but more are coming very soon.
+
+## Supported Formats
+
+- pgpass (specific to Postgres)
+- psql (specific to Postgres)
+- rails_yaml (renders host, database, username, password and port in yaml format to plug in to database.yml)
+
 ## Todo
 
 Support databases/data-stores other than Postgres.
