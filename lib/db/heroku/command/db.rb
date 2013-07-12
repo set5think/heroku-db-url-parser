@@ -52,6 +52,10 @@ class Heroku::Command::Db
 
       display(pgpassify(uri_parts))
 
+    elsif format == 'rails_yaml'
+
+      display(rails_yamlify(uri_parts))
+
     else
 
       display("#{format} not known or supported. Please use 'psql' or 'pgpass'")
@@ -68,6 +72,10 @@ class Heroku::Command::Db
 
   def pgpassify(uri_hash)
     "#{uri_hash[:host]}:#{uri_hash[:port]}:#{uri_hash[:db]}:#{uri_hash[:user]}:#{uri_hash[:pw]}"
+  end
+
+  def rails_yamlify(uri_hash)
+    "host: #{uri_hash[:host]}\ndatabase: #{uri_hash[:db]}\nusername: #{uri_hash[:user]}\npassword: #{uri_hash[:pw]}\nport: #{uri_hash[:port]}"
   end
 
   def cleanse_path(path)
