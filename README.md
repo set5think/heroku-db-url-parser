@@ -24,6 +24,8 @@ Currently, Postgres is the only supported database, but more are coming very soo
 
 - pgpass (specific to Postgres)
 - psql (specific to Postgres)
+- pg_dump (specific to Postgres)
+- pg_restore (specific to Postgres)
 - rails_yaml (renders host, database, username, password and port in yaml format to plug in to database.yml)
 
 ## Todo

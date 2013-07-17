@@ -2,7 +2,7 @@ require 'heroku/command/db'
 
 class Heroku::Command::Db
 
-  # db:parse_db_url [DATABASE_URL] [--format={psql|pgpass|rails_yaml}]
+  # db:parse_db_url [DATABASE_URL] [--format={psql|pgpass|rails_yaml|pg_dump|pg_restore}]
   #
   # generates a string to the format specified, psql by default, DATABASE_URL by default
   #
@@ -51,8 +51,12 @@ class Heroku::Command::Db
       pgpassify(uri_parts)
     when "rails_yaml"
       rails_yamlify(uri_parts)
+    when "pg_dump"
+      pgdumpify(uri_parts)
+    when "pg_restore"
+      pgrestorify(uri_parts)
     else
-      "#{format} not known or supported. Please use 'psql' or 'pgpass'"
+      "#{format} not known or supported. Please use one of |psql,pgpass,rails_yaml,pg_dump,pg_restore|'"
     end
 
   end
@@ -69,6 +73,14 @@ class Heroku::Command::Db
 
   def rails_yamlify(uri_hash)
     "host: #{uri_hash[:host]}\ndatabase: #{uri_hash[:db]}\nusername: #{uri_hash[:user]}\npassword: #{uri_hash[:pw]}\nport: #{uri_hash[:port]}"
+  end
+
+  def pgdumpify(uri_hash)
+    "pg_dump #{uri_hash[:db]} -h #{uri_hash[:host]} -p #{uri_hash[:port]} -U #{uri_hash[:user]}"
+  end
+
+  def pgrestorify(uri_hash)
+    "pg_restore -d #{uri_hash[:db]} -h #{uri_hash[:host]} -p #{uri_hash[:port]} -U #{uri_hash[:user]}"
   end
 
   def cleanse_path(path)
