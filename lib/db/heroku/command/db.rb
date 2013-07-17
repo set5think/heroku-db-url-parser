@@ -79,6 +79,7 @@ class Heroku::Command::Db
     when "alias"
       aname = options[:aliasname] || 'aliasname'
       acommand = options[:aliascommand] || 'psql'
+      acommand = 'psql' if acommand == 'alias'
       "alias #{aname}='#{render_format(acommand)}'"
     else
       "#{f} not known or supported. Please use one of |psql,pgpass,rails_yaml,pg_dump,pg_restore,alias|'"
