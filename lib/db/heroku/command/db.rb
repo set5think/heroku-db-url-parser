@@ -94,12 +94,4 @@ class Heroku::Command::Db
     path.sub(/^\//,'')
   end
 
-  def append_to_file(file, text)
-    raise "unable to write to #{file}" unless File.writable?(file)
-    display "Appending #{text} to #{file}"
-    open(file, 'a') do |f|
-      f.puts text
-    end
-  end
-
 end
