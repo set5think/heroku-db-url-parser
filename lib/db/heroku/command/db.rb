@@ -2,15 +2,13 @@ require 'heroku/command/db'
 
 class Heroku::Command::Db
 
-  # db:parse_db_url [DATABASE_URL] [--format {psql|pgpass|all}] [--alias NAME] [--append] [--bashfile BASHRC_PATH] [--pgpass PGPASS_PATH]
+  # db:parse_db_url [DATABASE_URL] [--format {psql|pgpass|rails_yaml|pg_dump|pg_restore|alias} [-aliasname NAME]
   #
   # generates a string to the format specified, psql by default, DATABASE_URL by default
   #
   # -f, --format FORMAT   # set the output format (psql, pgpass, all)
-  # --append              # append output to bash_profile (as an alias) and pgpass
-  # --alias NAME          # name of alias for bash_profile.
-  # --bashfile            # path to bashrc or bash_profile for appending. Defaults to ~/.bash_profile
-  # --pgpass              # path to pgpass file for appending. Defaults to ~/.pgpass
+  #                       # accepts comma seperated list
+  # --aliasname NAME      # name of alias used for the alias format option
   #
   #Examples:
   #
@@ -20,15 +18,14 @@ class Heroku::Command::Db
   #
   # $ heroku db:parse_db_url # generates psql string for DATABASE_URL
   #
-  # $ heroku db:parse_db_url --format all --append --alias db1 --bashfile /home/zaphod/.aliased
+  # $ heroku db:parse_db_url --format alias --aliasname pgtest  # generates an alias declaration for a bash_profile
   #
 
   def parse_db_url
     db = args.detect { |a| a.include?('HEROKU_POSTGRESQL_') } || 'DATABASE_URL'
 
     format = options[:format] || 'psql'
-    append = options[:append] || false
-
+    formats = format.split(/\s*,\s*/)
     db_info = {}
 
     heroku.config_vars(app).select do |k, v|
@@ -50,32 +47,25 @@ class Heroku::Command::Db
 
     return "#{uri_parts[:scheme]} not supported yet" if uri_parts[:scheme] != 'postgres'
 
-    case format
-      when 'psql', 'all'
-        display(psqlify(uri_parts))
-      when 'pgpass', 'all'
-        display(pgpassify(uri_parts))
+    formats.each do |f|
+      display case f
+      when "psql", nil
+        psqlify(uri_parts)
+      when "pgpass"
+        pgpassify(uri_parts)
+      when "rails_yaml"
+        rails_yamlify(uri_parts)
+      when "pg_dump"
+        pgdumpify(uri_parts)
+      when "pg_restore"
+        pgrestorify(uri_parts)
+      when "alias"
+        aname = options[:aliasname] || 'aliasname'
+        "alias #{aname}='#{psqlify(uri_parts)}'"
       else
-        display("#{format} not known or supported. Please use 'psql' or 'pgpass'")
-    end
-
-    if append
-      bash   = options[:bashfile] || "#{ENV['HOME']}/.bash_profile"
-      pgpass = options[:pgpass]   || "#{ENV['HOME']}/.pgpass"
-
-      if options[:alias] && !File.exists?(bash) 
-          display "File does not exists: #{bash}"
-      elsif !File.exists?(pgpass)
-          display "File does not exists: #{pgpass}"
-      else
-        if options[:alias]
-          alias_text = "alias #{options[:alias]}='#{psqlify(uri_parts)}'"
-          append_to_file(bash, alias_text)
-        end
-        append_to_file(pgpass, pgpassify(uri_parts))
+        "#{f} not known or supported. Please use one of |psql,pgpass,rails_yaml,pg_dump,pg_restore,alias|'"
       end
     end
-
   end
 
   protected
@@ -86,6 +76,18 @@ class Heroku::Command::Db
 
   def pgpassify(uri_hash)
     "#{uri_hash[:host]}:#{uri_hash[:port]}:#{uri_hash[:db]}:#{uri_hash[:user]}:#{uri_hash[:pw]}"
+  end
+
+  def rails_yamlify(uri_hash)
+    "host: #{uri_hash[:host]}\ndatabase: #{uri_hash[:db]}\nusername: #{uri_hash[:user]}\npassword: #{uri_hash[:pw]}\nport: #{uri_hash[:port]}"
+  end
+
+  def pgdumpify(uri_hash)
+    "pg_dump #{uri_hash[:db]} -h #{uri_hash[:host]} -p #{uri_hash[:port]} -U #{uri_hash[:user]}"
+  end
+
+  def pgrestorify(uri_hash)
+    "pg_restore -d #{uri_hash[:db]} -h #{uri_hash[:host]} -p #{uri_hash[:port]} -U #{uri_hash[:user]}"
   end
 
   def cleanse_path(path)

@@ -4,8 +4,6 @@ Extends `heroku db` command-line to parse database urls to other file formats.
 
 This extension aids in the situation where you need to convert your database url to another format.  For example, if you want to create an alias to a psql connection in your .bash\_login, it gets annoying to copy and paste it and then move things around, or if you want to add this database url to your .pgpass file, which is a different format than psql.
 
-The extension also provides the capability to append an alias to bash\_profile and/or the pgpass string to the pgpass file.
-
 ## Installation
 
     $ heroku plugins:install https://github.com/set5think/heroku-db-url-parser.git
@@ -18,9 +16,22 @@ The extension also provides the capability to append an alias to bash\_profile a
 
     $ heroku db:parse_db_url # parses DATABASE_URL and formats to psql, by default
 
-    $ heroku db:parse_db_url --append --alias db1 --bashfile /home/zaphod/.aliases --pgpass /home/zaphod/.pgpass # appends an alias named db1 and the pgpass string to the specified files
+    $ heroku db:parse_db_url --format alias --aliasname pgfoo  # outputs an alias declaration for psql suitable for bash_profile or bashrc
 
-    $ heroku db:parse_db_url --append # only appends to pgpass. Defaults to ~/.pgpass
+    $ heroku db:parse_db_url --format psql,pgpass  # outputs both formats fo DATABASE_URL
+
+## Supported Databases
+
+Currently, Postgres is the only supported database, but more are coming very soon.
+
+## Supported Formats
+
+- pgpass (specific to Postgres)
+- psql (specific to Postgres)
+- pg\_dump (specific to Postgres)
+- pg\_restore (specific to Postgres)
+- rails\_yaml (renders host, database, username, password and port in yaml format to plug in to database.yml)
+- alias (psql alias for bash\_profile. use the aliasname option to set the name in the output)
 
 ## Todo
 
@@ -33,6 +44,6 @@ This plugin is released under the MIT license. See the file LICENSE.
 
 ## Copyright
 
-Copyright &copy; 2013 Hassan Shahid.
+Copyright &copy; 2013 Hassan Shahid & Lukas Eklund
 
 [Contact]: mailto:set5think@gmail.com?subject=0Heroku%20DB%20URL%20Parser%20Plugin
