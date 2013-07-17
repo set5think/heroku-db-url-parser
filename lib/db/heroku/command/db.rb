@@ -2,9 +2,13 @@ require 'heroku/command/db'
 
 class Heroku::Command::Db
 
-  # db:parse_db_url [DATABASE_URL] [--format={psql|pgpass|rails_yaml|pg_dump|pg_restore}]
+  # db:parse_db_url [DATABASE_URL] [--format {psql|pgpass|rails_yaml|pg_dump|pg_restore|alias} [-aliasname NAME]
   #
   # generates a string to the format specified, psql by default, DATABASE_URL by default
+  #
+  # -f, --format FORMAT   # set the output format (psql, pgpass, all)
+  #                       # accepts comma seperated list
+  # --aliasname NAME      # name of alias used for the alias format option
   #
   #Examples:
   #
@@ -14,15 +18,14 @@ class Heroku::Command::Db
   #
   # $ heroku db:parse_db_url # generates psql string for DATABASE_URL
   #
+  # $ heroku db:parse_db_url --format alias --aliasname pgtest  # generates an alias declaration for a bash_profile
+  #
 
   def parse_db_url
-
     db = args.detect { |a| a.include?('HEROKU_POSTGRESQL_') } || 'DATABASE_URL'
 
-    format = args.detect { |a| a.include?("--format") }
-
-    format = format.split(/=/)[1] rescue nil
-
+    format = options[:format] || 'psql'
+    formats = format.split(/\s*,\s*/)
     db_info = {}
 
     heroku.config_vars(app).select do |k, v|
@@ -44,21 +47,25 @@ class Heroku::Command::Db
 
     return "#{uri_parts[:scheme]} not supported yet" if uri_parts[:scheme] != 'postgres'
 
-    display case format
-    when "psql", nil
-      psqlify(uri_parts)
-    when "pgpass"
-      pgpassify(uri_parts)
-    when "rails_yaml"
-      rails_yamlify(uri_parts)
-    when "pg_dump"
-      pgdumpify(uri_parts)
-    when "pg_restore"
-      pgrestorify(uri_parts)
-    else
-      "#{format} not known or supported. Please use one of |psql,pgpass,rails_yaml,pg_dump,pg_restore|'"
+    formats.each do |f|
+      display case f
+      when "psql", nil
+        psqlify(uri_parts)
+      when "pgpass"
+        pgpassify(uri_parts)
+      when "rails_yaml"
+        rails_yamlify(uri_parts)
+      when "pg_dump"
+        pgdumpify(uri_parts)
+      when "pg_restore"
+        pgrestorify(uri_parts)
+      when "alias"
+        aname = options[:aliasname] || 'aliasname'
+        "alias #{aname}='#{psqlify(uri_parts)}'"
+      else
+        "#{f} not known or supported. Please use one of |psql,pgpass,rails_yaml,pg_dump,pg_restore,alias|'"
+      end
     end
-
   end
 
   protected
