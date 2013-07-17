@@ -18,6 +18,8 @@ This extension aids in the situation where you need to convert your database url
 
     $ heroku db:parse_db_url --format alias --aliasname pgfoo  # outputs an alias declaration for psql suitable for bash_profile or bashrc
 
+    $ heroku db:parse_db_url --format alias --aliasname pgfoo --aliascommand pg_dump  # outputs an alias declaration for pg_dump suitable for bash_profile or bashrc
+
     $ heroku db:parse_db_url --format psql,pgpass  # outputs both formats fo DATABASE_URL
 
 ## Supported Databases
