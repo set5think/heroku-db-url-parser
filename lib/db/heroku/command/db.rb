@@ -2,7 +2,7 @@ require 'heroku/command/db'
 
 class Heroku::Command::Db
 
-  # db:parse_db_url [DATABASE_URL] [--format {psql|pgpass|rails_yaml|pg_dump|pg_restore|alias} [-aliasname NAME]
+  # db:parse_db_url [DATABASE_URL] [--format {psql|pgpass|rails_yaml|pg_dump|pg_restore|alias|sqitch} [-aliasname NAME]
   #
   # generates a string to the format specified, psql by default, DATABASE_URL by default
   #
@@ -76,13 +76,15 @@ class Heroku::Command::Db
       pg_dumpify(uri_parts)
     when "pg_restore"
       pg_restorify(uri_parts)
+    when "sqitch"
+      sqitchify(uri_parts)
     when "alias"
       aname = options[:aliasname] || 'aliasname'
       acommand = options[:aliascommand] || 'psql'
       acommand = 'psql' if acommand == 'alias'
       "alias #{aname}='#{render_format(acommand)}'"
     else
-      "#{f} not known or supported. Please use one of |psql,pgpass,rails_yaml,pg_dump,pg_restore,alias|'"
+      "#{_format} not known or supported. Please use one of |psql,pgpass,rails_yaml,pg_dump,pg_restore,alias,sqitch|'"
     end
   end
 
@@ -104,6 +106,10 @@ class Heroku::Command::Db
 
   def pg_restorify(uri_hash=uri_parts)
     "pg_restore -d #{uri_hash[:db]} -h #{uri_hash[:host]} -p #{uri_hash[:port]} -U #{uri_hash[:user]}"
+  end
+
+  def sqitchify(uri_hash=uri_parts)
+    "sqitch -d #{uri_hash[:db]} -h #{uri_hash[:host]} -p #{uri_hash[:port]} -u #{uri_hash[:user]}"
   end
 
   def cleanse_path(path)
