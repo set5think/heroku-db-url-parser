@@ -1,5 +1,12 @@
-if Heroku::VERSION.to_f >= 3.0
-  require 'db/heroku/command/pg'
-else
-  require 'db/heroku/command/db'
+require "db/heroku/command/pg"
+
+begin
+  require "heroku-api"
+rescue LoadError
+  puts <<-MSG
+  heroku-config - requires the heroku-api gem. Please install:
+
+  gem install heroku-api
+  MSG
+  exit
 end

@@ -1,6 +1,6 @@
 # Heroku Plugin for convenient format conversion of database urls
 
-Extends `heroku db` command-line to parse database urls to other file formats.  It also supports Heroku's change in their >=3.0.0 client update of removing the `heroku db` series of commands, and moving all database-related functionality to `heroku pg`.  So for versions >=3.0.0, all the below is `heroku pg` instead of `heroku db`
+Extends `heroku pg` command-line to parse database urls to other file formats.  It also supports Heroku's change in their >=3.0.0 client update of removing the `heroku pg` series of commands, and moving all database-related functionality to `heroku pg`.  So for versions >=3.0.0, all the below is `heroku pg` instead of `heroku pg`
 
 This extension aids in the situation where you need to convert your database url to another format.  For example, if you want to create an alias to a psql connection in your .bash\_login, it gets annoying to copy and paste it and then move things around, or if you want to add this database url to your .pgpass file, which is a different format than psql.
 
@@ -10,17 +10,17 @@ This extension aids in the situation where you need to convert your database url
 
 ## Usage
 
-    $ heroku db:parse_db_url HEROKU_POSTGRESQL_NAVY_URL --format=pgpass
+    $ heroku pg:parse_db_url HEROKU_POSTGRESQL_NAVY_URL --format=pgpass
 
-    $ heroku db:parse_db_url HEROKU_POSTGRESQL_NA --format=psql #matches the closest config env to 'HEROKU_POSTGRESQL_NA', which in this case would be HEROKU_POSTGRESQL_NAVY_URL
+    $ heroku pg:parse_db_url HEROKU_POSTGRESQL_NA --format=psql #matches the closest config env to 'HEROKU_POSTGRESQL_NA', which in this case would be HEROKU_POSTGRESQL_NAVY_URL
 
-    $ heroku db:parse_db_url # parses DATABASE_URL and formats to psql, by default
+    $ heroku pg:parse_db_url # parses DATABASE_URL and formats to psql, by default
 
-    $ heroku db:parse_db_url --format alias --aliasname pgfoo  # outputs an alias declaration for psql suitable for bash_profile or bashrc
+    $ heroku pg:parse_db_url --format alias --aliasname pgfoo  # outputs an alias declaration for psql suitable for bash_profile or bashrc
 
-    $ heroku db:parse_db_url --format alias --aliasname pgfoo --aliascommand pg_dump  # outputs an alias declaration for pg_dump suitable for bash_profile or bashrc
+    $ heroku pg:parse_db_url --format alias --aliasname pgfoo --aliascommand pg_dump  # outputs an alias declaration for pg_dump suitable for bash_profile or bashrc
 
-    $ heroku db:parse_db_url --format psql,pgpass  # outputs both formats fo DATABASE_URL
+    $ heroku pg:parse_db_url --format psql,pgpass  # outputs both formats fo DATABASE_URL
 
 ## Supported Databases
 
