@@ -1,8 +1,14 @@
 # Heroku Plugin for convenient format conversion of database urls
 
-Extends `heroku pg` command-line to parse database urls to other file formats.  It also supports Heroku's change in their >=3.0.0 client update of removing the `heroku pg` series of commands, and moving all database-related functionality to `heroku pg`.  So for versions >=3.0.0, all the below is `heroku pg` instead of `heroku pg`
+Extends `heroku pg` command-line to parse database urls to other file formats.
+By default, it will parse the value of DATABASE\_URL from the output of `heroku
+config`.
 
-This extension aids in the situation where you need to convert your database url to another format.  For example, if you want to create an alias to a psql connection in your .bash\_login, it gets annoying to copy and paste it and then move things around, or if you want to add this database url to your .pgpass file, which is a different format than psql.
+This extension aids in the situation where you need to convert your database
+url to another format. For example, if you want to create an alias to a psql
+connection in your .bash\_login, it gets annoying to copy and paste it and then
+move things around, or if you want to add this database url to your .pgpass
+file, which is a different format than psql.
 
 ## Installation
 
