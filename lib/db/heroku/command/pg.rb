@@ -30,8 +30,9 @@ class Heroku::Command::Pg
     format = options[:format] || 'psql'
     formats = format.split(/\s*,\s*/)
     @db_info = {}
+    #heroku.config_vars(app).select do |k, v|
 
-    heroku.config_vars(app).select do |k, v|
+    api.get_config_vars(app).body.select do |k,v|
       if k.include?(db)
         @db_info[:name] = k
         @db_info[:conn_string] = v
